@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hitung Volume {{ shape_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="pixel-container">
+        <a href="{{ url_for('home') }}">&lt; Kembali ke Home</a>
+        <h1 class="pixel-title">Hitung Volume {{ shape_name }}</h1>
+
+        <form action="{{ url_for('hitung') }}" method="POST" class="pixel-form-group">
+            <input type="hidden" name="shape_id" value="{{ shape_id }}">
+
+            {% if shape_id == 'kubus' %}
+            <label for="sisi">Panjang Sisi (cm)</label>
+            <input type="number" step="any" id="sisi" name="sisi" class="pixel-input" required>
+            
+            {% elif shape_id == 'balok' %}
+            <label for="panjang">Panjang (cm)</label>
+            <input type="number" step="any" id="panjang" name="panjang" class="pixel-input" required>
+            <br>
+            <label for="lebar">Lebar (cm)</label>
+            <input type="number" step="any" id="lebar" name="lebar" class="pixel-input" required>
+            <br>
+            <label for="tinggi">Tinggi (cm)</label>
+            <input type="number" step="any" id="tinggi" name="tinggi" class="pixel-input" required>
+
+
+            {% elif shape_id == 'bola' %}
+            <label for="jari_jari">Jari-jari (cm)</label>
+            <input type="number" step="any" id="jari_jari" name="jari_jari" class="pixel-input" required>
+            
+            {% elif shape_id == 'tabung' %}
+            <label for="jari_jari_tabung">Jari-jari Alas (cm)</label>
+            <input type="number" step="any" id="jari_jari_tabung" name="jari_jari_tabung" class="pixel-input" required>
+            <br>
+            <label for="tinggi_tabung">Tinggi Tabung (cm)</label>
+            <input type="number" step="any" id="tinggi_tabung" name="tinggi_tabung" class="pixel-input" required>
+
+            {% elif shape_id == 'prisma' %}
+            <label for="alas_segitiga">Alas Segitiga (cm)</label>
+            <input type="number" step="any" id="alas_segitiga" name="alas_segitiga" class="pixel-input" required>
+            <br>
+            <label for="tinggi_segitiga">Tinggi Segitiga (cm)</label>
+            <input type="number" step="any" id="tinggi_segitiga" name="tinggi_segitiga" class="pixel-input" required>
+            <br>
+            <label for="tinggi">Tinggi (cm)</label>
+            <input type="number" step="any" id="tinggi" name="tinggi" class="pixel-input" required>
+
+            {% elif shape_id == 'kerucut' %}
+            <label for="jari_jari_alas">Jari-jari Alas (cm)</label>
+            <input type="number" step="any" id="jari_jari_alas" name="jari_jari_alas" class="pixel-input" required>
+            <br>
+            <label for="tinggi">Tinggi Tabung (cm)</label>
+            <input type="number" step="any" id="tinggi" name="tinggi" class="pixel-input" required>
+
+            {% elif shape_id == 'limas' %}
+            <label for="sisi_alas">Sisi Alas</label>
+            <input type="number" step="any" id="sisi_alas" name="sisi_alas" class="pixel-input" required>
+            <br>
+            <label for="tinggi">Tinggi Limas</label>
+            <input type="number" step="any" id="tinggi" name="tinggi" class="pixel-input" required>
+
+            {% endif %}
+            
+            <br>
+            <button type="submit" class="pixel-button large">Count!</button>
+        </form>
+    </div>
+</body>
+</html>

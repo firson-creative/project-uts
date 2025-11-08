@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - Pixel Volume</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="pixel-container">
+        <div class="header">
+            <h1 class="pixel-title">Pilih Bangun Ruang</h1>
+            <span>Halo, <strong>{{ username }}</strong>! [<a href="{{ url_for('logout') }}">Logout</a>]</span>
+        </div>
+        
+        <p>Klik pada bangun ruang untuk memulai perhitungan volume:</p>
+
+        <div class="shape-grid">
+            {% for shape in shapes %}
+            <a href="{{ url_for('kalkulator', shape_id=shape.id) }}" class="pixel-card">
+                <div class="pixel-card-image">
+                    <img src="{{ url_for('static', filename='images/' + shape.image) }}" alt="{{ shape.name }}">
+                </div>
+                <h3>{{ shape.name }}</h3>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

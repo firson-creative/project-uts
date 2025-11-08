@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hasil Perhitungan</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="pixel-container">
+        <h1 class="pixel-title">Hasil Perhitungan</h1>
+
+        <div class="pixel-card result-box">
+            <h3>Input Anda:</h3>
+            <ul>
+                {% for key, value in data.inputs.items() %}
+                    {% if key != 'shape_id' %}
+                        <li><strong>{{ key|capitalize }}:</strong> {{ value }} cm</li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="pixel-card result-box highlight">
+            <h3>Volume {{ data.inputs.shape_id|capitalize }}:</h3>
+            <h2 class="pixel-result">{{ data.volume }} cm³</h2>
+        </div>
+
+        <a href="{{ url_for('home') }}" class="pixel-button">Hitung Lagi</a>
+    </div>
+</body>
+</html>
