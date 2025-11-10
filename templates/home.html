@@ -9,14 +9,14 @@
     <div class="pixel-container">
         <div class="header">
             <h1 class="pixel-title">Pilih Bangun Ruang</h1>
-            <span>Halo, kandaku <strong>{{ username }}</strong>! [<a href="{{ url_for('logout') }}">Logout</a>]</span>
+            <span>Halo, kandaku <strong>{{ username }}</strong>! [<a href="{{ url_for('logout') }}">Keluar</a>]</span>
         </div>
         
         <p>Klik pada bangun ruang untuk memulai perhitungan volume:</p>
 
         <div class="shape-grid">
             {% for shape in shapes %}
-            <a href="{{ url_for('kalkulator', shape_id=shape.id) }}" class="pixel-card">
+            <a href="{{ url_for('kalkulator', bangun_ruang=shape.id) }}" class="pixel-card">
                 <div class="pixel-card-image">
                     <img src="{{ url_for('static', filename='images/' + shape.image) }}" alt="{{ shape.name }}">
                 </div>
@@ -24,6 +24,34 @@
             </a>
             {% endfor %}
         </div>
-    </div>
+
+        <hr class="pixel-divider">
+        <h3 class="pixel-title">Riwayat:</h3>
+        
+        {% if history_list %}
+            <table class="pixel-history-table">
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Bangun Ruang</th>
+                        <th>Input</th>
+                        <th>Volume (cm³)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for history in history_list %}
+                    <tr>
+                        <td>{{ history.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ history.shape_name }}</td>
+                        <td>{{ history.inputs_str }}</td>
+                        <td><strong>{{ history.volume }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Belum ada riwayat perhitungan.</p>
+        {% endif %}
+        </div>
 </body>
 </html>
