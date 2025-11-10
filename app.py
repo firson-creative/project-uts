@@ -1,16 +1,34 @@
 import math
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask_sqlalchemy import SQLAlchemy 
+from datetime import datetime
 
 app = Flask(__name__)
 
-app.secret_key = 'Menda_PakBoko_GAyyyy_354236yyyyyy'
+app.config['SECRET_KEY'] = 'Menda_PakBoko_GAyyyy_354236yyyyyy'  
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pixel_volume.db' 
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)  
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    history_entries = db.relationship('History', backref='user', lazy=True)
+
+class History(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    shape_name = db.Column(db.String(50), nullable=False)
+    inputs_str = db.Column(db.String(200), nullable=False)
+    volume = db.Column(db.Float, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 def is_logged_in():
-    return 'username' in session
+    return 'user_id' in session
 
 @app.route('/')
 def index():
-
     return redirect(url_for('login'))
 
 
@@ -18,20 +36,30 @@ def index():
 def login():
     if request.method == 'POST':
         username = request.form['username']
-        
-        session['username'] = username
 
-        flash(f'Selamat datang, {username}!', 'success')
+        user = User.query.filter_by(username=username).first()
+        
+        if not user:
+            user = User(username=username)
+            db.session.add(user)
+            db.session.commit()
+            flash(f'User baru "{username}" telah dibuat!', 'success')
+        else:
+            flash(f'Selamat datang kembali, {username}!', 'success')
+        
+        session['user_id'] = user.id
+        session['username'] = user.username 
+
         return redirect(url_for('home'))
 
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
+    session.pop('user_id', None)
     session.pop('username', None)
     flash('Anda telah logout.', 'info')
     return redirect(url_for('login'))
-
 
 @app.route('/home')
 def home():
@@ -47,12 +75,13 @@ def home():
         {'name': 'Kerucut', 'id': 'kerucut', 'image': 'kerucut.png'},
         {'name': 'Limas', 'id': 'limas', 'image': 'limas.png'}
     ]
-    return render_template('home.html', shapes=shapes, username=session['username'])
 
-# --- Halaman 4: Kalkulator (Input Dimensi) ---
+    user_history = History.query.filter_by(user_id=session['user_id']).order_by(History.timestamp.desc()).all()
+    
+    return render_template('home.html', shapes=shapes, username=session['username'], history_list=user_history)
 
-@app.route('/kalkulator/<string:shape_id>')
-def kalkulator(shape_id):
+@app.route('/kalkulator/<string:bangun_ruang>')
+def kalkulator(bangun_ruang):
     if not is_logged_in():
         return redirect(url_for('login'))
     
@@ -65,22 +94,19 @@ def kalkulator(shape_id):
         'kerucut': 'Kerucut',
         'limas': 'Limas'
     }
-    shape_name = shape_map.get(shape_id)
+    shape_name = shape_map.get(bangun_ruang)
     
     if not shape_name:
         flash('Bangun ruang tidak ditemukan.', 'danger')
         return redirect(url_for('home'))
-        
-    return render_template('kalkulator.html', shape_id=shape_id, shape_name=shape_name)
 
-# --- Halaman 5: Result (Hasil Perhitungan) ---
+    return render_template('kalkulator.html', bangun_ruang=bangun_ruang, shape_name=shape_name)
 
 @app.route('/hitung', methods=['POST'])
 def hitung():
     if not is_logged_in():
         return redirect(url_for('login'))
-    
-    shape_id = request.form['shape_id']
+    shape_id = request.form['bangun_ruang'] 
     data_input = {'shape_id': shape_id}
     volume = 0
     
@@ -137,17 +163,29 @@ def hitung():
         
         result_data = {
             'inputs': data_input,
-            'volume': round(volume, 4)
+            'volume': round(volume, 3)
         }
+        inputs_str = ", ".join([f"{key}: {value}" for key, value in data_input.items() if key != 'shape_id'])
+        
+        new_history = History(
+            shape_name=shape_id.capitalize(),
+            inputs_str=inputs_str,
+            volume=round(volume, 4),
+            user_id=session['user_id']
+        )
+        db.session.add(new_history)
+        db.session.commit()
         
         return render_template('result.html', data=result_data)
         
     except ValueError:
         flash('Input tidak valid, harap masukkan angka.', 'danger')
-        return redirect(url_for('kalkulator', shape_id=shape_id))
+        return redirect(url_for('kalkulator', bangun_ruang=shape_id))
     except Exception as e:
         flash(f'Terjadi error: {e}', 'danger')
         return redirect(url_for('home'))
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
